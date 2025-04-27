@@ -1,40 +1,40 @@
 version: "3.8"
 services:
-  # order-service:
-  #   build: ./order-service
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - postgres
-  #     - rabbitmq
-  #     - temporal
-  #   environment:
-  #     - DATABASE_URL=postgres://postgres:secret@postgres:5432/bistro92?sslmode=disable
+  order-service:
+    build: ./order-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - temporal
+    environment:
+      - DATABASE_URL=postgres://postgres:secret@postgres:5432/bistro92?sslmode=disable
 
-  # notification-service:
-  #   build: ./notification-service
-  #   ports:
-  #     - "3001:3001"
-  #   depends_on:
-  #     - rabbitmq
-  #     - temporal
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      - rabbitmq
+      - temporal
 
-  # dashboard-service:
-  #   build: ./dashboard-service
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - postgres
-  #     - redis
+  dashboard-service:
+    build: ./dashboard-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - redis
 
-  # frontend:
-  #   build: ./frontend
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - order-service
-  #     - notification-service
-  #     - dashboard-service
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - order-service
+      - notification-service
+      - dashboard-service
 
   postgres:
     image: postgres:14
