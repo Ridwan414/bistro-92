@@ -1,0 +1,133 @@
+### Get all orders
+GET http://localhost:8000/orders
+Content-Type: application/json
+
+### Get a specific order by ID
+GET http://localhost:8000/orders/1
+Content-Type: application/json
+
+### Create a new order
+POST http://localhost:8000/orders
+Content-Type: application/json
+
+{
+  "TableNumber": 8,
+  "Items": [
+    {
+      "ItemID": 1,
+      "Name": "Pizza",
+      "Quantity": 4,
+      "Price": 10.99
+    },
+    {
+      "ItemID": 2,
+      "Name": "Soda",
+      "Quantity": 7,
+      "Price": 2.99
+    }
+  ]
+}
+
+### Update order status
+PATCH http://localhost:8000/orders/1
+Content-Type: application/json
+
+{
+  "status": "In Progress"
+}
+
+### Update order status to ready
+PATCH http://localhost:8000/orders/1
+Content-Type: application/json
+
+{
+  "status": "Ready"
+}
+
+### Update order status to completed
+PATCH http://localhost:8000/orders/1
+Content-Type: application/json
+
+{
+  "status": "Completed"
+}
+
+### Cancel an order
+PATCH http://localhost:8000/orders/1
+Content-Type: application/json
+
+{
+  "status": "Cancelled"
+}
+
+### Delete an order
+DELETE http://localhost:8000/orders/1
+Content-Type: application/json
+
+### Get all menu items
+GET http://localhost:8000/menu-items
+Content-Type: application/json
+
+### Get a specific menu item
+GET http://localhost:8000/menu-items/1
+Content-Type: application/json
+
+### Create a new menu item
+POST http://localhost:8000/menu-items
+Content-Type: application/json
+
+{
+  "name": "Chicken Sandwich",
+  "price": 9.99,
+  "category": "Main"
+}
+
+### Update a menu item
+PUT http://localhost:8000/menu-items/1
+Content-Type: application/json
+
+{
+  "name": "Deluxe Pizza",
+  "price": 12.99,
+  "category": "Main"
+}
+
+### Delete a menu item
+DELETE http://localhost:8000/menu-items/1
+Content-Type: application/json
+
+### Get dashboard metrics
+GET http://localhost:5000/dashboard/metrics
+Content-Type: application/json
+
+### Get orders by status
+GET http://localhost:8000/orders?status=Pending
+Content-Type: application/json
+
+### Get orders by table
+GET http://localhost:8000/orders?table=5
+Content-Type: application/json
+
+### Assign staff to an order
+PATCH http://localhost:8000/orders/1
+Content-Type: application/json
+
+{
+  "assigned_to": "John Doe"
+}
+
+### Get sales by timeframe (today)
+GET http://localhost:5000/dashboard/sales?timeframe=today
+Content-Type: application/json
+
+### Get sales by timeframe (week)
+GET http://localhost:5000/dashboard/sales?timeframe=week
+Content-Type: application/json
+
+### Get sales by timeframe (month)
+GET http://localhost:5000/dashboard/sales?timeframe=month
+Content-Type: application/json
+
+### Check WebSocket service status
+GET http://localhost:3001/status
+Content-Type: application/json

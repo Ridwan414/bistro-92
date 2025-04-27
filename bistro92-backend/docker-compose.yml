@@ -1,0 +1,88 @@
+version: "3.8"
+services:
+  # order-service:
+  #   build: ./order-service
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - postgres
+  #     - rabbitmq
+  #     - temporal
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:secret@postgres:5432/bistro92?sslmode=disable
+
+  # notification-service:
+  #   build: ./notification-service
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - rabbitmq
+  #     - temporal
+
+  # dashboard-service:
+  #   build: ./dashboard-service
+  #   ports:
+  #     - "5000:5000"
+  #   depends_on:
+  #     - postgres
+  #     - redis
+
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - order-service
+  #     - notification-service
+  #     - dashboard-service
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=bistro92
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./order-service/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  temporal:
+    image: temporalio/auto-setup:1.22.0
+    ports:
+      - "7233:7233"
+    environment:
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=secret
+      - POSTGRES_SEEDS=postgres
+    depends_on:
+      - postgres
+  
+  # Temporal UI
+  temporal-ui:
+    image: temporalio/ui:2.13.2
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "8085:8080"
+    depends_on:
+      - temporal
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "4040:8080"

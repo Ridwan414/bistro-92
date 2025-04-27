@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bistro 92 Notifications</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .notification { 
+            margin: 10px 0; 
+            padding: 15px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .notification.new-order { border-left: 4px solid #28a745; }
+        .notification.status-change { border-left: 4px solid #007bff; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .items { margin-top: 10px; }
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-pending { background-color: #ffc107; color: #212529; }
+        .badge-in-progress { background-color: #007bff; }
+        .badge-ready { background-color: #28a745; }
+        .badge-completed { background-color: #6c757d; }
+        .badge-cancelled { background-color: #dc3545; }
+        .timestamp { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Bistro 92 Notifications</h1>
+    <div>
+        <select id="room">
+            <option value="kitchen">Kitchen</option>
+            <option value="dashboard">Dashboard</option>
+        </select>
+        <button onclick="connect()">Join Room</button>
+    </div>
+    <div id="status" class="notification" style="display: none;"></div>
+    <div id="notifications"></div>
+    <script>
+        let socket;
+        function connect() {
+            const room = document.getElementById("room").value;
+            const statusEl = document.getElementById("status");
+            
+            statusEl.textContent = "Connecting...";
+            statusEl.style.display = "block";
+            statusEl.style.borderLeft = "4px solid #ffc107";
+            
+            socket = new WebSocket(`ws://localhost:3001/ws?room=${room}`);
+            
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log("Received notification:", data);
+                
+                const div = document.createElement("div");
+                div.className = `notification ${data.type === 'new_order' ? 'new-order' : 'status-change'}`;
+                
+                const header = document.createElement("div");
+                header.className = "header";
+                
+                const title = document.createElement("h3");
+                title.style.margin = "0";
+                title.textContent = `Table #${data.table_number}`;
+                
+                let statusClass = '';
+                switch(data.status) {
+                    case 'Pending': statusClass = 'badge-pending'; break;
+                    case 'In Progress': statusClass = 'badge-in-progress'; break;
+                    case 'Ready': statusClass = 'badge-ready'; break;
+                    case 'Completed': statusClass = 'badge-completed'; break;
+                    case 'Cancelled': statusClass = 'badge-cancelled'; break;
+                    default: statusClass = 'badge-pending';
+                }
+                
+                const status = document.createElement("span");
+                status.className = `badge ${statusClass}`;
+                status.textContent = data.status || "New Order";
+                
+                header.appendChild(title);
+                header.appendChild(status);
+                div.appendChild(header);
+                
+                const message = document.createElement("p");
+                message.textContent = data.message;
+                div.appendChild(message);
+                
+                if (data.items && data.items.length > 0) {
+                    const itemsList = document.createElement("div");
+                    itemsList.className = "items";
+                    
+                    const itemsTitle = document.createElement("strong");
+                    itemsTitle.textContent = "Items:";
+                    itemsList.appendChild(itemsTitle);
+                    
+                    const ul = document.createElement("ul");
+                    data.items.forEach(item => {
+                        const li = document.createElement("li");
+                        const name = item.Name || item.name || `Item #${item.ItemID || item.item_id}`;
+                        const quantity = item.Quantity || item.quantity || 1;
+                        li.textContent = `${name} x${quantity}`;
+                        ul.appendChild(li);
+                    });
+                    
+                    itemsList.appendChild(ul);
+                    div.appendChild(itemsList);
+                }
+                
+                const timestamp = document.createElement("div");
+                timestamp.className = "timestamp";
+                timestamp.textContent = new Date(data.timestamp).toLocaleString();
+                div.appendChild(timestamp);
+                
+                document.getElementById("notifications").prepend(div);
+            };
+            
+            socket.onopen = function() {
+                statusEl.textContent = `Connected to ${room} room`;
+                statusEl.style.borderLeft = "4px solid #28a745";
+            };
+            
+            socket.onclose = function() {
+                statusEl.textContent = `Disconnected from ${room} room`;
+                statusEl.style.borderLeft = "4px solid #dc3545";
+            };
+            
+            socket.onerror = function(error) {
+                statusEl.textContent = `Error connecting to ${room} room`;
+                statusEl.style.borderLeft = "4px solid #dc3545";
+                console.error("WebSocket error:", error);
+            };
+        }
+    </script>
+</body>
+</html> 
